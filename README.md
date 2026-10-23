@@ -19,7 +19,7 @@ DocSense is a question-answering system for three very different PDFs. All three
 
 ### First-time setup
 ```bash
-cd "/Users/bacancy/Desktop/untitled folder/Advanced-RAG"
+cd DocSense
 
 python3.12 -m venv .venv
 source .venv/bin/activate
@@ -27,10 +27,11 @@ pip install -r requirements.txt
 
 cp .env.example .env        # then open .env and set GOOGLE_API_KEY
 ```
+`requirements.txt` pins `cryptography<49`. Newer versions have no prebuilt wheel for Intel Macs, so pip would try to compile them, and that fails without OpenSSL and `pkg-config`.
 
 ### Start
 ```bash
-cd "/Users/bacancy/Desktop/untitled folder/Advanced-RAG"
+cd DocSense
 source .venv/bin/activate
 
 docker compose up -d                 # 1. vector database (Qdrant) on port 6333
@@ -38,7 +39,7 @@ uvicorn main:app --port 8000         # 2. web app
 ```
 Wait for `INFO: models loaded, ready for questions`, then open **http://localhost:8000**.
 
-The 3 documents are already processed and stored in Qdrant, so you can start asking questions right away.
+If the documents are already indexed in your local Qdrant, you can start asking questions right away. On a fresh clone, see **Fresh machine or empty database** below.
 
 ### Stop
 ```bash
@@ -52,6 +53,8 @@ If Qdrant has no data, for example on a new machine, index the documents once:
 python -m ingestion.ingest --doc all
 ```
 Or use **Documents → Process** in the UI.
+
+`data/parsed/` and `data/chunks/` are git-ignored, so a fresh clone has no saved parses. The first run parses every PDF from scratch, which calls Gemini Vision and takes several minutes. Later runs reuse the saved parses.
 
 ---
 
@@ -226,7 +229,7 @@ python -m evaluation.evaluate --doc all           # run the test questions (LLM 
 ## 8. Project layout
 
 ```
-Advanced-RAG/
+DocSense/
 ├── config.py                 settings + DOCUMENTS registry (strategy per document)
 ├── main.py                   FastAPI: chat, documents, upload, ingest jobs with progress
 ├── rag_service.py            prompt, Gemini call (fallback + rate-limit handling), grounded answer
@@ -240,16 +243,19 @@ Advanced-RAG/
 │   └── search.py             hybrid search → rerank → parent expansion → context budget
 ├── evaluation/
 │   ├── questions.json        33 test questions with expected answers and pages
-│   └── evaluate.py           LLM-judge scoring (correctness, faithfulness, page hits)
+│   ├── evaluate.py           LLM-judge scoring (correctness, faithfulness, page hits)
+│   └── results/              evaluation run outputs (git-ignored)
 ├── static/index.html         UI (Chat, Documents)
 ├── data/
 │   ├── *.pdf                 the 3 source documents
-│   ├── parsed/<doc>.json     saved parse (slow step, cached)
-│   └── chunks/<doc>.json     chunks + parent sections + stats
+│   ├── parsed/<doc>.json     saved parse (slow step, cached; git-ignored)
+│   └── chunks/<doc>.json     chunks + parent sections + stats (git-ignored)
 ├── docker-compose.yaml       Qdrant v1.15.4
 ├── requirements.txt
-└── .env / .env.example
+├── .gitignore
+└── .env / .env.example       .env is git-ignored; copy it from .env.example
 ```
+`gpo`, `worldbank` and `imac` are the document IDs used in file names, in `--doc` and in the `doc_id` payload field.
 
 ---
 
