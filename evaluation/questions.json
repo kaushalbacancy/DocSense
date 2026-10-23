@@ -1,0 +1,304 @@
+{
+  "_how_to": "Questions per document. 'expected' and 'expected_pages' (PDF page numbers) are optional but enable correctness and page-hit scores. 'kind' is just a label for the report. Add the assignment's sample questions here.",
+  "gpo": [
+    {
+      "kind": "fact",
+      "question": "What was GPO's total revenue in FY 2018?",
+      "expected": "$874.5 million (exactly $874,466,000).",
+      "expected_pages": [
+        6,
+        14,
+        25,
+        26
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "What was GPO's net income in FY 2018?",
+      "expected": "$20.4 million, excluding income set aside for passport-related capital investments and funds from a downward adjustment.",
+      "expected_pages": [
+        6,
+        25,
+        26,
+        44
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "How many passports did GPO produce for the State Department in FY 2018?",
+      "expected": "Approximately 16 million (15,901,600).",
+      "expected_pages": [
+        6,
+        14
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "How many libraries participate in the Federal Depository Library Program?",
+      "expected": "1,133 Federal, academic, public, law, and other libraries.",
+      "expected_pages": [
+        8,
+        15,
+        19,
+        39
+      ]
+    },
+    {
+      "kind": "list",
+      "question": "What are the five goals of GPO's strategic plan?",
+      "expected": "Exceeding stakeholders' expectations; enhancing access to Federal Government information; strengthening GPO's position as the government-wide authority on publishing; promoting collaboration and innovation within government; engaging employees and enhancing internal operations.",
+      "expected_pages": [
+        9
+      ]
+    },
+    {
+      "kind": "table",
+      "question": "How did the Congressional Publishing Appropriation in 1980 compare with FY 2018?",
+      "expected": "1980: $91.6 million ($285.4 million in constant dollars); FY 2018: $79.5 million, a reduction of more than 72% in constant dollar terms.",
+      "expected_pages": [
+        12
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "How many staff did GPO have in FY 2018?",
+      "expected": "1,737.",
+      "expected_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "Who transmitted the annual report, and to whom was it addressed?",
+      "expected": "John W. Crawford, Acting Deputy Director, to Mike Pence (President of the Senate) and Nancy Pelosi (Speaker of the House), on April 25, 2019.",
+      "expected_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "How many depository libraries did GPO staff visit in FY 2018?",
+      "expected": "166 depository libraries in 25 states (over 610 over three years).",
+      "expected_pages": [
+        5,
+        21
+      ]
+    },
+    {
+      "kind": "out_of_scope",
+      "question": "What was Apple's revenue in 2018?",
+      "expected": "Not in the document; the system should say it couldn't find it."
+    }
+  ],
+  "worldbank": [
+    {
+      "kind": "fact",
+      "question": "What is the projected global growth rate for 2026?",
+      "expected": "2.5 percent in 2026, down from 2.9 percent in 2025, the lowest since the COVID-19 pandemic.",
+      "expected_pages": [
+        19,
+        25,
+        27
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "What growth is expected for emerging market and developing economies (EMDEs) this year?",
+      "expected": "EMDE growth is expected to slow to 3.6 percent in 2026.",
+      "expected_pages": [
+        19,
+        28,
+        30,
+        42
+      ]
+    },
+    {
+      "kind": "scenario",
+      "question": "How low could global growth fall in 2026 in the downside scenario?",
+      "expected": "To 1.3 percent, if energy supply disruptions are more severe than assumed and accompanied by substantial financial stress.",
+      "expected_pages": [
+        19,
+        25,
+        29,
+        41
+      ]
+    },
+    {
+      "kind": "section",
+      "question": "According to Box 1.1, how is AI expected to boost growth in the near term versus the medium term?",
+      "expected": "Near term: mainly through higher investment, especially in advanced economies. Medium term: through faster productivity growth.",
+      "expected_pages": [
+        30
+      ]
+    },
+    {
+      "kind": "section",
+      "question": "What constraints to private investment do firms cite in EMDEs?",
+      "expected": "Persistent infrastructure gaps, high risk and uncertainty, and limited access to finance.",
+      "expected_pages": [
+        44,
+        45,
+        46,
+        47
+      ]
+    },
+    {
+      "kind": "table",
+      "question": "What is Saudi Arabia's real GDP growth forecast for 2026?",
+      "expected": "3.1 percent (a 1.2 percentage point downgrade from January 2026 projections).",
+      "expected_pages": [
+        95,
+        188
+      ]
+    },
+    {
+      "kind": "table",
+      "question": "What is Qatar's GDP growth forecast for 2026 and how much was it revised?",
+      "expected": "-5.7 percent in 2026, revised down by 11.0 percentage points from January 2026 projections.",
+      "expected_pages": [
+        95,
+        188
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "How do revenues and primary spending in commodity exporters respond to a 1 percent increase in commodity prices?",
+      "expected": "Both rise by about 0.4 percent after five years, suggesting windfalls are gradually spent rather than saved.",
+      "expected_pages": [
+        20,
+        145,
+        148,
+        149,
+        151,
+        157
+      ]
+    },
+    {
+      "kind": "section",
+      "question": "What happens to sovereign borrowing costs when hidden debt is revealed?",
+      "expected": "Hidden debt revelations are associated with large and significant increases in sovereign spreads (Box 3.1).",
+      "expected_pages": [
+        100,
+        116,
+        117,
+        118,
+        119
+      ]
+    },
+    {
+      "kind": "section",
+      "question": "In South Asia, which countries faced elevated inflation or monetary tightening?",
+      "expected": "Bangladesh, where inflation stayed elevated with tight monetary policy; Sri Lanka tightened monetary policy at the end of May.",
+      "expected_pages": [
+        96,
+        97
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "When is per capita income in EMDEs excluding China and India expected to return to its pre-pandemic level relative to advanced economies?",
+      "expected": "Not until after 2028, implying nearly a decade of lost income convergence.",
+      "expected_pages": [
+        19,
+        51,
+        52
+      ]
+    },
+    {
+      "kind": "out_of_scope",
+      "question": "What is the carbon footprint of the iMac?",
+      "expected": "Not in the document; the system should say it couldn't find it."
+    }
+  ],
+  "imac": [
+    {
+      "kind": "chart",
+      "question": "What is the total carbon footprint of iMac (two ports) 256GB?",
+      "expected": "346 kg CO2e.",
+      "expected_pages": [
+        2,
+        10
+      ]
+    },
+    {
+      "kind": "chart",
+      "question": "What were the baseline emissions and how much were emissions reduced?",
+      "expected": "Baseline (business-as-usual) emissions of 445 kg, reduced by 99 kg to 346 kg, a reduction of more than 20 percent.",
+      "expected_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "table",
+      "question": "How are the life cycle emissions of iMac broken down by phase?",
+      "expected": "Production 50%, transportation 5%, product use 45%, end-of-life processing <1%.",
+      "expected_pages": [
+        10
+      ]
+    },
+    {
+      "kind": "table",
+      "question": "What is the carbon footprint of iMac (four ports) 512GB?",
+      "expected": "391 kg CO2e.",
+      "expected_pages": [
+        10
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "How energy efficient is iMac compared with ENERGY STAR?",
+      "expected": "It uses 58 percent less energy than the ENERGY STAR requirement.",
+      "expected_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "How much recycled content is in the iMac's fiber packaging?",
+      "expected": "76 percent recycled content; packaging is 100 percent fiber-based.",
+      "expected_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "footnote",
+      "question": "How much recycled content does iMac contain, and how is recycled content defined?",
+      "expected": "More than 15 percent. Per the endnote, it is the mass of certified recycled material relative to the overall mass of the device, not including packaging or in-box accessories.",
+      "expected_pages": [
+        1,
+        2,
+        4,
+        11
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "In how many components does iMac use at least 50 percent recycled plastic?",
+      "expected": "13 components.",
+      "expected_pages": [
+        4
+      ]
+    },
+    {
+      "kind": "footnote",
+      "question": "What usage period does Apple assume for macOS devices in its carbon footprint?",
+      "expected": "A four-year period for power use by first owners (three years for iOS and watchOS devices).",
+      "expected_pages": [
+        9
+      ]
+    },
+    {
+      "kind": "fact",
+      "question": "How much did recycled content and low-carbon electricity reduce product emissions?",
+      "expected": "Recycled content reduced total product emissions by about 13 percent; supplier low-carbon electricity reduced product emissions by 5 percent.",
+      "expected_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "out_of_scope",
+      "question": "What is the projected global GDP growth for 2026?",
+      "expected": "Not in the document; the system should say it couldn't find it."
+    }
+  ]
+}

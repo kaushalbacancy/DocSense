@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocSense</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #1d2330; --muted: #6b7385; --border: #e3e6ec;
+    --accent: #3b5bdb; --accent-soft: #e8edff; --ok: #2b8a3e; --ok-soft: #e6f6ea; --warn: #b35c00;
+    --warn-soft: #fff1e0; --err: #c92a2a; --err-soft: #ffe8e8; --user: #3b5bdb; --user-text: #fff;
+    --code: #f1f3f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151c; --panel: #1a1f29; --text: #e6e9ef; --muted: #98a0b3; --border: #2a3140;
+      --accent: #7c95ff; --accent-soft: #232c4a; --ok: #69db7c; --ok-soft: #1c3324; --warn: #ffb35c;
+      --warn-soft: #3a2a14; --err: #ff8787; --err-soft: #3a1c1c; --user: #3b5bdb; --user-text: #fff;
+      --code: #222836;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { display: flex; align-items: center; gap: 24px; padding: 14px 24px; background: var(--panel);
+           border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; }
+  nav { display: flex; gap: 4px; }
+  nav button { background: none; border: 0; padding: 8px 14px; border-radius: 8px; color: var(--muted);
+               font: inherit; cursor: pointer; }
+  nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  main { max-width: 1000px; margin: 0 auto; padding: 20px 16px; }
+  .tab { display: none; } .tab.active { display: block; }
+  button.primary { background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 9px 16px;
+                   font: inherit; font-weight: 600; cursor: pointer; }
+  button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border);
+                     border-radius: 8px; padding: 8px 14px; font: inherit; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* document picker */
+  .doc-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .doc-card { background: var(--panel); border: 2px solid var(--border); border-radius: 12px; padding: 12px 14px;
+              cursor: pointer; text-align: left; font: inherit; color: inherit; }
+  .doc-card.active { border-color: var(--accent); background: var(--accent-soft); }
+  .doc-card .name { font-weight: 600; }
+  .doc-card .sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .badge { display: inline-block; font-size: 11.5px; padding: 1px 8px; border-radius: 99px; margin-top: 6px;
+           background: var(--code); color: var(--muted); }
+  .badge.ok { background: var(--ok-soft); color: var(--ok); }
+  .badge.warn { background: var(--warn-soft); color: var(--warn); }
+
+  /* chat */
+  .chat { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; display: flex;
+          flex-direction: column; height: calc(100vh - 290px); min-height: 380px; }
+  .messages { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .empty { margin: auto; text-align: center; color: var(--muted); max-width: 460px; }
+  .suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+  .suggestions button { background: var(--code); border: 1px solid var(--border); border-radius: 99px;
+                        padding: 6px 12px; font: inherit; font-size: 13px; color: var(--text); cursor: pointer; }
+  .msg { max-width: 85%; }
+  .msg.user { align-self: flex-end; background: var(--user); color: var(--user-text); padding: 10px 14px;
+              border-radius: 14px 14px 4px 14px; white-space: pre-wrap; }
+  .msg.bot { align-self: flex-start; }
+  .bubble { background: var(--code); padding: 12px 14px; border-radius: 14px 14px 14px 4px; white-space: pre-wrap; }
+  .bubble.notfound { background: var(--warn-soft); }
+  .bubble.error { background: var(--err-soft); color: var(--err); }
+  .cite { display: inline-block; font-size: 11.5px; font-weight: 600; background: var(--accent-soft);
+          color: var(--accent); border-radius: 5px; padding: 0 5px; margin: 0 1px; cursor: pointer; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { font-size: 12.5px; background: var(--panel); border: 1px solid var(--border); border-radius: 99px;
+          padding: 2px 10px; color: var(--muted); }
+  .chip.conf-high { color: var(--ok); } .chip.conf-mid { color: var(--warn); } .chip.conf-low { color: var(--err); }
+  details.sources { margin-top: 8px; }
+  details.sources summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+  .source { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-top: 8px;
+            background: var(--panel); }
+  .source.flash { outline: 2px solid var(--accent); }
+  .source .head { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12.5px; color: var(--muted); }
+  .source .head b { color: var(--text); }
+  .source .text { font-family: ui-monospace, Menlo, monospace; font-size: 12px; white-space: pre-wrap;
+                  margin-top: 6px; max-height: 220px; overflow: auto; }
+  .bar { display: inline-block; width: 50px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; vertical-align: middle; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .composer { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border); }
+  .composer input { flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+                    background: var(--bg); color: var(--text); font: inherit; }
+  .thinking { color: var(--muted); font-size: 13.5px; }
+  .thinking span { animation: blink 1.2s infinite; }
+  @keyframes blink { 50% { opacity: .3; } }
+
+  /* documents + eval */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .card h3 { margin: 0 0 2px; font-size: 16px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 13px; margin: 10px 0; }
+  .kv span:nth-child(odd) { color: var(--muted); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .log { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; background: var(--code); border-radius: 8px;
+         padding: 8px; margin-top: 10px; max-height: 130px; overflow: auto; white-space: pre-wrap; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .tile { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+  .tile .v { font-size: 22px; font-weight: 700; } .tile .l { font-size: 12.5px; color: var(--muted); }
+  .table-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel);
+           color: var(--text); font: inherit; }
+  .progress { margin-top: 12px; }
+  .progress .stage { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+  .progress .stage b { font-weight: 600; }
+  .track { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 6px 0 4px; }
+  .track i { display: block; height: 100%; background: var(--accent); transition: width .4s; }
+  .track.indeterminate i { width: 35%; animation: slide 1.2s infinite ease-in-out; }
+  @keyframes slide { 0% { margin-left: -35%; } 100% { margin-left: 100%; } }
+  .steps { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; font-size: 12px; color: var(--muted); }
+  .steps span.done { color: var(--ok); } .steps span.now { color: var(--accent); font-weight: 600; }
+  .result { margin-top: 10px; font-size: 13px; padding: 8px 10px; border-radius: 8px; }
+  .result.ok { background: var(--ok-soft); color: var(--ok); } .result.err { background: var(--err-soft); color: var(--err); }
+  .help { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  details.log-box summary { cursor: pointer; font-size: 12px; color: var(--muted); margin-top: 8px; }
+  #toasts { position: fixed; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
+  .toast { background: var(--panel); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+           border-radius: 8px; padding: 10px 14px; max-width: 340px; box-shadow: 0 4px 16px rgba(0,0,0,.15); font-size: 14px; }
+  .toast.ok { border-left-color: var(--ok); } .toast.err { border-left-color: var(--err); }
+  @media (max-width: 600px) { .msg { max-width: 100%; } header { padding: 12px 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 DocSense</h1>
+  <nav>
+    <button data-tab="chat" class="active">Chat</button>
+    <button data-tab="docs">Documents</button>
+  </nav>
+</header>
+
+<div id="toasts"></div>
+<main>
+  <!-- CHAT -->
+  <section id="tab-chat" class="tab active">
+    <div class="doc-picker" id="docPicker"></div>
+    <div class="chat">
+      <div class="messages" id="messages"></div>
+      <form class="composer" id="composer">
+        <input id="question" placeholder="Ask a question about this document..." autocomplete="off">
+        <button class="primary" id="sendBtn">Send</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- DOCUMENTS -->
+  <section id="tab-docs" class="tab">
+    <p class="muted">Each document is already processed and ready. Use these only when the PDF or the processing code changes.
+      <b>Re-index</b> is fast (re-chunks and re-embeds the saved text). <b>Re-parse</b> reads the PDF again with AI and takes several minutes.</p>
+    <div class="grid" id="docCards"></div>
+  </section>
+
+</main>
+
+<script>
+const $ = (sel, el = document) => el.querySelector(sel);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const TYPE_ICON = { text: "📝", table: "📊", chart: "📈", footnote: "🔖" };
+const PROFILE_LABEL = { narrative: "Narrative", hierarchical: "Hierarchical", structured: "Tables · Charts · Footnotes" };
+
+let docs = [], questions = {}, current = null;
+const chats = {};  // doc_id -> rendered message nodes, so switching documents keeps each chat
+
+// ---------- tabs
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("active", x === b));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.id === "tab-" + b.dataset.tab));
+  if (b.dataset.tab === "docs") loadDocs();
+});
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.detail || res.statusText);
+  return data;
+}
+
+// ---------- documents
+let pollTimer = null;
+async function loadDocs() {
+  try { docs = await api("/api/documents"); }
+  catch (e) { toast("Can't reach the server: " + e.message, "err"); return; }
+  docs.forEach(d => {
+    const prev = lastState[d.id];
+    if (prev === "running" && d.job.state === "done") toast(`✓ "${d.name}" is ready (${d.job.stats.chunks} chunks, ${fmtTime(d.job.finished - d.job.started)}).`, "ok");
+    if (prev === "running" && d.job.state === "error") toast(`"${d.name}": ${d.job.error}`, "err");
+    lastState[d.id] = d.job.state;
+  });
+  renderPicker();
+  renderDocCards();
+  clearTimeout(pollTimer);
+  if (docs.some(d => d.job.state === "running")) pollTimer = setTimeout(loadDocs, 1000);
+}
+
+const STAGES = ["Reading", "Checking", "Fixing", "Splitting", "Embedding"];
+const fmtTime = sec => sec < 60 ? `${Math.max(1, Math.round(sec))}s` : `${Math.floor(sec / 60)}m ${Math.round(sec % 60)}s`;
+const lastState = {};
+
+function toast(msg, kind = "") {
+  const t = el("div", "toast " + kind, msg);
+  $("#toasts").append(t);
+  setTimeout(() => t.remove(), 6000);
+}
+
+function statusBadge(d) {
+  if (d.job.state === "running") return el("span", "badge warn", "Updating…");
+  if (d.indexed_chunks) return el("span", "badge ok", `Ready · ${d.indexed_chunks} chunks`);
+  if (d.file_present) return el("span", "badge warn", "Not processed yet");
+  return el("span", "badge", "No PDF yet");
+}
+
+function renderPicker() {
+  const box = $("#docPicker"); box.replaceChildren();
+  if (!current && docs.length) current = (docs.find(d => d.indexed_chunks) || docs[0]).id;
+  docs.forEach(d => {
+    const b = el("button", "doc-card" + (d.id === current ? " active" : ""));
+    b.append(el("div", "name", d.name), el("div", "sub", PROFILE_LABEL[d.profile]), statusBadge(d));
+    b.onclick = () => { current = d.id; renderPicker(); };
+    box.append(b);
+  });
+  renderMessages();
+}
+
+function progressBox(job) {
+  const box = el("div", "progress");
+  const now = Date.now() / 1000;
+  const elapsed = now - job.started;
+  const stage = el("div", "stage");
+  stage.append(el("b", null, job.stage + "…"), el("span", "muted", `${fmtTime(elapsed)} elapsed`));
+  box.append(stage);
+
+  const track = el("div", "track"), fill = el("i");
+  track.append(fill);
+  let detail = "";
+  if (job.total > 1) {
+    fill.style.width = Math.round(100 * job.done / job.total) + "%";
+    detail = `${job.done} / ${job.total}`;
+    const stageElapsed = now - job.stage_started;
+    if (job.done > 0 && job.done < job.total) {
+      detail += ` · about ${fmtTime(stageElapsed / job.done * (job.total - job.done))} left for this step`;
+    }
+  } else {
+    track.classList.add("indeterminate");
+  }
+  box.append(track, el("div", "muted", detail || "\u00a0"));
+
+  const steps = el("div", "steps");
+  const current = STAGES.findIndex(x => job.stage.startsWith(x));
+  [["Read PDF", 0], ["Quality check", 1], ["Fix bad pages", 2], ["Chunk", 3], ["Embed + save", 4]].forEach(([label, i]) => {
+    const cls = i < current ? "done" : i === current ? "now" : "";
+    steps.append(el("span", cls, (cls === "done" ? "✓ " : "") + label + (i < 4 ? "  →" : "")));
+  });
+  box.append(steps);
+  return box;
+}
+
+function renderDocCards() {
+  const box = $("#docCards"); box.replaceChildren();
+  docs.forEach(d => {
+    const c = el("div", "card");
+    const running = d.job.state === "running";
+    c.append(el("h3", null, d.name), el("div", "muted", d.description), statusBadge(d));
+
+    const kv = el("div", "kv");
+    const add = (k, v) => kv.append(el("span", null, k), el("span", null, v));
+    add("File", d.file + (d.file_present ? "" : " (missing)"));
+    add("Strategy", `${d.profile} · parser: ${d.stats?.parser || d.parser}`);
+    if (d.stats) {
+      add("Pages", d.stats.pages);
+      add("Chunks", d.stats.chunks + (d.stats.parents ? ` (+${d.stats.parents} parent sections)` : ""));
+      add("Content", Object.entries(d.stats.types).map(([k, v]) => `${TYPE_ICON[k] || ""} ${v} ${k}`).join("  "));
+    }
+    c.append(kv);
+
+    if (running) c.append(progressBox(d.job));
+    if (d.job.state === "done" && d.job.stats) {
+      c.append(el("div", "result ok", `✓ Finished in ${fmtTime(d.job.finished - d.job.started)} · ${d.job.stats.chunks} chunks ready`));
+    }
+    if (d.job.state === "error") c.append(el("div", "result err", "⚠️ " + (d.job.error || "Processing failed")));
+
+    const row = el("div", "row");
+    const file = el("input"); file.type = "file"; file.accept = "application/pdf"; file.style.display = "none";
+    const up = el("button", "secondary", d.file_present ? "Replace PDF" : "Upload PDF");
+    up.disabled = running;
+    up.onclick = () => file.click();
+    file.onchange = async () => {
+      if (!file.files[0]) return;
+      if (d.file_present && !confirm(`Replace the PDF for "${d.name}"?\n\nIt will then be re-parsed automatically (takes a few minutes).`)) return;
+      const fd = new FormData(); fd.append("file", file.files[0]);
+      up.disabled = true; up.textContent = "Uploading…";
+      try {
+        await api(`/api/documents/${d.id}/upload`, { method: "POST", body: fd });
+        toast(`PDF uploaded. Processing "${d.name}"…`);
+        await startIngest(d.id, true, true);
+      } catch (e) { toast(e.message, "err"); loadDocs(); }
+    };
+    const ing = el("button", "primary", d.stats ? "Re-index" : "Process");
+    ing.title = "Re-chunk and re-embed the saved text. Fast, no AI calls.";
+    ing.disabled = !d.file_present || running;
+    ing.onclick = () => startIngest(d.id, !d.stats);
+    const rep = el("button", "secondary", "Re-parse PDF");
+    rep.title = "Read the whole PDF again with AI. Slow, uses Gemini quota.";
+    rep.disabled = !d.file_present || running;
+    rep.onclick = () => {
+      if (confirm(`Re-parse "${d.name}" from scratch?\n\nThis reads all ${d.stats?.pages || ""} pages again (AI vision for tables, charts and scanned pages). It can take several minutes and uses Gemini quota.\n\nOnly needed if the PDF or the parser changed.`)) startIngest(d.id, true);
+    };
+    row.append(up, file, ing, rep);
+    c.append(row);
+    c.append(el("div", "help", running ? "You can keep using the other documents while this runs."
+                                       : "Re-index: ~10–100s. Re-parse: several minutes."));
+    if (d.job.log?.length) {
+      const det = el("details", "log-box"); det.append(el("summary", null, "Technical log"), el("div", "log", d.job.log.join("\n")));
+      c.append(det);
+    }
+    box.append(c);
+  });
+}
+
+async function startIngest(id, reparse, silent) {
+  const d = docs.find(x => x.id === id);
+  try {
+    await api(`/api/documents/${id}/ingest?reparse=${reparse}`, { method: "POST" });
+    if (!silent) toast(`${reparse ? "Re-parsing" : "Re-indexing"} "${d.name}" started. Progress is shown on the card.`);
+  } catch (e) { toast(e.message, "err"); }
+  loadDocs();
+}
+
+// ---------- chat
+function renderMessages() {
+  const box = $("#messages"); box.replaceChildren();
+  const doc = docs.find(d => d.id === current);
+  if (!doc) return;
+  const nodes = chats[current] || [];
+  if (!nodes.length) {
+    const e = el("div", "empty");
+    e.append(el("div", null, `Ask anything about the ${doc.name}.`));
+    if (!doc.indexed_chunks) e.append(el("div", "muted", "This document isn't indexed yet. Go to the Documents tab first."));
+    const sugg = el("div", "suggestions");
+    (questions[current] || []).slice(0, 4).forEach(q => {
+      const b = el("button", null, q.question); b.onclick = () => ask(q.question); sugg.append(b);
+    });
+    e.append(sugg); box.append(e);
+  } else nodes.forEach(n => box.append(n));
+  box.scrollTop = box.scrollHeight;
+}
+
+function push(node) { (chats[current] ||= []).push(node); renderMessages(); }
+
+function renderAnswerText(text, onCite) {
+  // turn "[S2]" into clickable chips; everything else stays plain text (no innerHTML)
+  const frag = document.createDocumentFragment();
+  text.split(/(\[S\d+(?:\s*,\s*S\d+)*\])/g).forEach(part => {
+    const m = part.match(/^\[(S\d+(?:\s*,\s*S\d+)*)\]$/);
+    if (!m) { frag.append(part); return; }
+    m[1].split(/\s*,\s*/).forEach(sid => { const c = el("span", "cite", sid); c.onclick = () => onCite(sid); frag.append(c); });
+  });
+  return frag;
+}
+
+function answerNode(data, ms) {
+  const wrap = el("div", "msg bot");
+  const bubble = el("div", "bubble" + (data.found ? "" : " notfound"));
+  const sourcesBox = el("details", "sources");
+  const sourceEls = {};
+  bubble.append(renderAnswerText(data.answer, sid => {
+    sourcesBox.open = true;
+    const s = sourceEls[sid]; if (!s) return;
+    s.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    s.classList.add("flash"); setTimeout(() => s.classList.remove("flash"), 1200);
+  }));
+  wrap.append(bubble);
+
+  const chips = el("div", "chips");
+  const conf = Math.round((data.confidence_score || 0) * 100);
+  chips.append(el("span", "chip " + (conf >= 75 ? "conf-high" : conf >= 40 ? "conf-mid" : "conf-low"), `🎯 ${conf}% confidence`));
+  if (data.source_pages?.length) chips.append(el("span", "chip", `📄 Page${data.source_pages.length > 1 ? "s" : ""} ${data.source_pages.join(", ")}`));
+  const cited = data.sources.filter(s => s.cited);
+  const sections = [...new Set(cited.map(s => s.section).filter(Boolean))];
+  if (sections.length) chips.append(el("span", "chip", `📂 ${sections[0]}${sections.length > 1 ? ` +${sections.length - 1}` : ""}`));
+  const types = [...new Set(cited.map(s => s.type))].filter(t => t !== "text");
+  types.forEach(t => chips.append(el("span", "chip", `${TYPE_ICON[t]} from ${t}`)));
+  chips.append(el("span", "chip", `🔢 ${data.token_count.toLocaleString()} tok`));
+  chips.append(el("span", "chip", `⚡ ${(ms / 1000).toFixed(1)}s (search ${data.timings.retrieval_ms}ms · LLM ${data.timings.llm_ms}ms)`));
+  wrap.append(chips);
+
+  if (data.sources.length) {
+    sourcesBox.append(el("summary", null, `Show sources (${data.sources.length} retrieved, ${cited.length} cited)`));
+    data.sources.forEach(s => {
+      const box = el("div", "source");
+      const head = el("div", "head");
+      const bar = el("span", "bar"); const fill = el("i"); fill.style.width = Math.round(s.score * 100) + "%"; bar.append(fill);
+      head.append(el("b", null, s.sid), el("span", null, `${TYPE_ICON[s.type] || ""} ${s.type}`),
+                  el("span", null, `· page ${s.pages.join(", ")}`), bar, el("span", null, `${Math.round(s.score * 100)}% relevant`));
+      if (s.cited) head.append(el("span", "badge ok", "cited"));
+      box.append(head);
+      if (s.section) box.append(el("div", "muted", "📂 " + s.section));
+      box.append(el("div", "text", s.text));
+      sourceEls[s.sid] = box;
+      sourcesBox.append(box);
+    });
+    wrap.append(sourcesBox);
+  }
+  return wrap;
+}
+
+async function ask(q) {
+  q = (q ?? $("#question").value).trim();
+  if (!q || !current) return;
+  const docId = current;
+  if (docs.find(d => d.id === docId)?.job.state === "running") { toast("This document is being updated. Ask again when it shows Ready.", "err"); return; }
+  $("#question").value = "";
+  push(el("div", "msg user", q));
+  const thinking = el("div", "msg bot thinking");
+  thinking.append(el("span", null, "Searching the document, reranking, asking Gemini…"));
+  push(thinking);
+  $("#sendBtn").disabled = true;
+  const t = performance.now();
+  try {
+    const data = await api("/api/query", { method: "POST", headers: { "Content-Type": "application/json" },
+                                           body: JSON.stringify({ question: q, doc_id: docId }) });
+    chats[docId].splice(chats[docId].indexOf(thinking), 1, answerNode(data, performance.now() - t));
+  } catch (e) {
+    const err = el("div", "msg bot"); err.append(el("div", "bubble error", "⚠️ " + e.message));
+    chats[docId].splice(chats[docId].indexOf(thinking), 1, err);
+  }
+  $("#sendBtn").disabled = false;
+  if (current === docId) renderMessages();
+}
+
+$("#composer").onsubmit = e => { e.preventDefault(); ask(); };
+
+// ---------- boot
+(async () => {
+  try { questions = await api("/api/eval/questions"); } catch { questions = {}; }
+  await loadDocs();
+})();
+</script>
+</body>
+</html>

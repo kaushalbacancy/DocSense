@@ -1,0 +1,11 @@
+fastapi==0.141.1
+uvicorn[standard]
+python-multipart
+pydantic-settings
+qdrant-client==1.19.1
+fastembed==0.8.0
+google-genai
+pymupdf==1.26.4
+pymupdf4llm==0.0.27
+# optional: only if you switch a document's parser to "llamaparse"
+# llama-parse
