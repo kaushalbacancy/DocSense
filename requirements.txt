@@ -7,5 +7,6 @@ fastembed==0.8.0
 google-genai
 pymupdf==1.26.4
 pymupdf4llm==0.0.27
+cryptography<49  # 50.x has no Intel-Mac wheel; avoids a source build
 # optional: only if you switch a document's parser to "llamaparse"
 # llama-parse
